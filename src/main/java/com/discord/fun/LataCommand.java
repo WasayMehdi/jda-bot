@@ -35,7 +35,7 @@ public class LataCommand extends AudioCommand {
 
         message.delete().submit();
 
-        botAudioPlayer.load("C:\\Users\\smehd\\OneDrive\\VT\\Photos\\LATASHORT.mp3", 0);
+        botAudioPlayer.load("LATASHORT.mp3", 0);
 
         final Optional<Member> mentioned = event.getMessage().getMentionedMembers().stream()
                 .findFirst();

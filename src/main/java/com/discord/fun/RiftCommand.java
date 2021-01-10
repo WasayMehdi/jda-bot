@@ -15,12 +15,12 @@ public class RiftCommand  extends BaseCommand {
     @Override
     public boolean execute(GuildMessageReceivedEvent event, String[] args) {
 
-        String imageLink = "C:\\Users\\smehd\\OneDrive\\VT\\Photos\\rift.jpg";
+        String imageLink = "rift.jpg";
 
         if(args.length == 2) {
             switch (args[1].toLowerCase()) {
                 case "phone":
-                    imageLink = "C:\\Users\\smehd\\OneDrive\\VT\\Photos\\phonecall.png";
+                    imageLink = "phonecall.png";
                     break;
             }
 
