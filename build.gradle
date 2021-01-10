@@ -1,0 +1,70 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.71'
+    id "fi.evident.beanstalk" version "0.2.3"
+    id 'war'
+}
+
+group 'com.wasaymehdi'
+version '1.0-SNAPSHOT'
+mainClassName= 'Main'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'net.dv8tion', name: 'JDA', version: '4.2.0_168'
+    implementation 'com.sedmelluq:lavaplayer:1.3.65'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation 'com.beust:klaxon:5.0.1'
+    compile 'khttp:khttp:0.1.0'
+}
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+beanstalk {
+    s3Endpoint = "s3-eu-west-1.amazonaws.com"
+    beanstalkEndpoint = "elasticbeanstalk.eu-west-1.amazonaws.com"
+
+    deployments {
+        // Example to deploy to the same env
+        staging {
+            file = 'build/libs/my-jda-bot-1.0-SNAPSHOT.war'
+            application = 'my-app'
+            environment = 'Notabot-env'
+        }
+        // Example to create a new env for each version (to use URL swapping for blue/green deployment)
+        production {
+            file = 'tasks.productionWar'
+            application = 'my-app'
+            environment = "my-app-${project.version.replaceAll('\\.', '-')}"
+            template = 'default' // Saved configuration name to use to create each env
+        }
+        // Example to upload a new version to an application without deploying it (to be able to
+        //  manually pick which environment to use)
+        upload {
+            file = 'tasks.war'
+            application = 'my-app'
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'src/main/java/Main'
+    }
+}
