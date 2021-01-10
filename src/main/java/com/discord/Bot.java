@@ -15,7 +15,7 @@ public class Bot {
 
     public Bot() {
 
-        this.jdaBuilder = JDABuilder.createDefault("NDM2NjA2NjI5MzkyMjg1Njk3.XZVFMA.vx6y7F0eXsn169knmRfGsdZ9P7k");
+        this.jdaBuilder = JDABuilder.createDefault("NDM2NjA2NjI5MzkyMjg1Njk3.WtjrnA.P6NOTCLRONFVPOr5AoR_26zpeJ0");
         this.audioPlayer = new BotAudioPlayer();
 
 
