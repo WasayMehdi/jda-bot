@@ -73,4 +73,7 @@ public class MusicPlayer {
         return songs;
     }
 
+    public Song peek() {
+        return songs.peek();
+    }
 }

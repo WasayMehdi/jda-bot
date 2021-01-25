@@ -161,7 +161,11 @@ public class MusicPlayerCommand extends AudioCommand {
                 nextPlayingMessages.pop().thenApply(message -> message.delete().submit());
             }
             botAudioPlayer.play(voiceChannel, audioManager, (a, b, endReason) -> {
-                playNextSong();
+                if(musicPlayer.peek() != null) {
+                    playNextSong();
+                } else {
+                    audioManager.closeAudioConnection();
+                }
             });
             botAudioPlayer.load(song.getLink(), 0);
             nextPlayingMessages.push(
@@ -188,7 +192,6 @@ public class MusicPlayerCommand extends AudioCommand {
         });
 
         textChannel.sendMessage(listQueue.toString()).queue();
-
     }
 
     public static Song forArgs(final String[] args, final int index) {

@@ -29,11 +29,12 @@ public class BotAudioPlayer {
 
     private static final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
 
-    private final AudioPlayer audioPlayer = playerManager.createPlayer();
+    private static final AudioPlayer audioPlayer;
 
     static {
         playerManager.registerSourceManager(new YoutubeAudioSourceManager());
         playerManager.registerSourceManager(new LocalAudioSourceManager());
+        audioPlayer = playerManager.createPlayer();
     }
 
 
