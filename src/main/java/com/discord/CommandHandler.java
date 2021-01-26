@@ -26,7 +26,8 @@ class CommandHandler extends ListenerAdapter {
     static {
         COMMAND_MAP.put("meme", new MemeCommand());
         COMMAND_MAP.put("roll", new RollCommand());
-        COMMAND_MAP.put("lata", new LataCommand());
+        COMMAND_MAP.put("lata", new LataCommand("LATASHORT.mp3"));
+        COMMAND_MAP.put("paramedics", new LataCommand("paramedics.mp3"));
         COMMAND_MAP.put("shh", new ShhCommand());
         COMMAND_MAP.put("rift", new RiftCommand());
         COMMAND_MAP.put("dcane", new DCaneCommand());

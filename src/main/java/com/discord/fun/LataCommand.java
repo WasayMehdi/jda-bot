@@ -30,12 +30,19 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class LataCommand extends AudioCommand {
+
+    private final String file;
+
+    public LataCommand(final String file) {
+        this.file = file;
+    }
+
     @Override
     public boolean execute(GuildMessageReceivedEvent event, String[] args) {
 
         message.delete().submit();
 
-        botAudioPlayer.load("LATASHORT.mp3", 0);
+        botAudioPlayer.load(file, 0);
 
         final Optional<Member> mentioned = event.getMessage().getMentionedMembers().stream()
                 .findFirst();
