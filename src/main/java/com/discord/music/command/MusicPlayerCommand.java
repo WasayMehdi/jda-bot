@@ -5,6 +5,7 @@ import com.discord.music.MusicPlayer;
 import com.discord.music.Playlist;
 import com.discord.music.PlaylistManager;
 import com.discord.music.Song;
+import com.google.common.collect.Lists;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioTrack;
 import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeSearchProvider;
@@ -15,6 +16,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.managers.AudioManager;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 import java.util.Arrays;
 import java.util.List;
@@ -175,19 +177,10 @@ public class MusicPlayerCommand extends AudioCommand {
         final AtomicInteger integer = new AtomicInteger();
         final StringBuilder listQueue = new StringBuilder();
 
-        listQueue.append(integer.getAndIncrement())
-                .append(". ")
-                .append(musicPlayer.getCurrent().getName())
-                .append("\n");
-
-        musicPlayer.getQueue().forEach(song -> {
-            listQueue.append(integer.getAndIncrement() == 0 ? "Current" : integer.get())
-                    .append(". ")
-                    .append(song.getName())
-                    .append("\n");
-        });
-
-        textChannel.sendMessage(listQueue.toString()).queue();
+        Lists.partition(musicPlayer.getQueue(), 30)
+                .stream()
+                .map(list -> PlaylistCommand.forSongList(list, integer.getAndIncrement()))
+                .map(textChannel::sendMessage).forEach(MessageAction::queue);
 
     }
 

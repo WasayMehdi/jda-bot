@@ -8,8 +8,12 @@ import com.discord.music.Playlist;
 import com.discord.music.PlaylistManager;
 import com.discord.music.Song;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
+import javax.xml.ws.handler.soap.SOAPMessageContext;
+import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -113,20 +117,25 @@ public class PlaylistCommand extends BaseCommand {
 
     private void listPlaylist(final Playlist playlist) {
         final AtomicInteger integer = new AtomicInteger();
-        final StringBuilder listQueue = new StringBuilder();
 
-        listQueue.append("Songs for '").append(playlist.name).append("'\n");
+        textChannel.sendMessage("Songs for " + playlist.name).queue();
+        Lists.partition(playlist.getSongs(), 30)
+                .stream()
+                .map(list -> forSongList(list, integer.incrementAndGet()))
+                .map(textChannel::sendMessage).forEach(MessageAction::queue);
 
-        playlist.getSongs().forEach(song -> {
-            listQueue.append(integer.incrementAndGet())
+    }
+
+    public static String forSongList(final List<Song> songs, final int integer) {
+        final StringBuilder listQueue = new StringBuilder("```");
+        songs.forEach(song -> {
+            listQueue.append(integer)
                     .append(". ")
                     .append(song.getName())
                     .append("\n");
         });
-
-
-        Splitter.fixedLength(1000).split(listQueue.toString())
-                .forEach(s -> textChannel.sendMessage(s).queue());
+        listQueue.append("```");
+        return listQueue.toString();
     }
 
     @Override
