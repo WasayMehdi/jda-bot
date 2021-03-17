@@ -7,6 +7,7 @@ import com.discord.music.MusicPlayer;
 import com.discord.music.Playlist;
 import com.discord.music.PlaylistManager;
 import com.discord.music.Song;
+import com.google.common.base.Splitter;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 import java.util.Arrays;
@@ -123,7 +124,9 @@ public class PlaylistCommand extends BaseCommand {
                     .append("\n");
         });
 
-        textChannel.sendMessage(listQueue.toString()).queue();
+
+        Splitter.fixedLength(1000).split(listQueue.toString())
+                .forEach(s -> textChannel.sendMessage(s).queue());
     }
 
     @Override
