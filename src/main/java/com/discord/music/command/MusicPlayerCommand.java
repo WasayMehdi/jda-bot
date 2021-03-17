@@ -179,7 +179,7 @@ public class MusicPlayerCommand extends AudioCommand {
 
         Lists.partition(musicPlayer.getQueue(), 30)
                 .stream()
-                .map(list -> PlaylistCommand.forSongList(list, integer.getAndIncrement()))
+                .map(list -> PlaylistCommand.forSongList(list, integer))
                 .map(textChannel::sendMessage).forEach(MessageAction::queue);
 
     }

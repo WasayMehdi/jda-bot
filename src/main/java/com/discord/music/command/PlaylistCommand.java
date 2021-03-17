@@ -121,15 +121,15 @@ public class PlaylistCommand extends BaseCommand {
         textChannel.sendMessage("Songs for " + playlist.name).queue();
         Lists.partition(playlist.getSongs(), 30)
                 .stream()
-                .map(list -> forSongList(list, integer.incrementAndGet()))
+                .map(list -> forSongList(list, integer))
                 .map(textChannel::sendMessage).forEach(MessageAction::queue);
 
     }
 
-    public static String forSongList(final List<Song> songs, final int integer) {
+    public static String forSongList(final List<Song> songs, final AtomicInteger integer) {
         final StringBuilder listQueue = new StringBuilder("```");
         songs.forEach(song -> {
-            listQueue.append(integer)
+            listQueue.append(integer.getAndIncrement())
                     .append(". ")
                     .append(song.getName())
                     .append("\n");
