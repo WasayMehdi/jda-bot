@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class MusicPlayerCommand extends AudioCommand {
 
-    public static final List<String> COMMANDS = Arrays.asList("play", "skip", "restart", "queue", "shuffle", "remove", "addlist", "volume");
+    public static final List<String> COMMANDS = Arrays.asList("play", "skip", "restart", "queue", "shuffle", "remove", "addlist", "volume", "clear");
 
     private static final YoutubeSearchProvider youtubeSearchProvider
             = new YoutubeSearchProvider();
