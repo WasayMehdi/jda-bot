@@ -8,7 +8,7 @@ import java.io.IOException;
 public class RestartCommand extends BaseCommand {
     @Override
     public boolean execute(GuildMessageReceivedEvent event, String[] args) {
-        ProcessBuilder pb = new ProcessBuilder("nohup restart.sh > /dev/null 2>/dev/null &");
+        ProcessBuilder pb = new ProcessBuilder("sh", "restart.sh");
         try {
             pb.start();
         } catch (IOException e) {
