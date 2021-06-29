@@ -35,6 +35,7 @@ class CommandHandler extends ListenerAdapter {
         COMMAND_MAP.put("turdify", new Turdify());
         COMMAND_MAP.put("dogify", new Dogify());
         COMMAND_MAP.put("archive", new ArchiveCommand());
+        COMMAND_MAP.put("restart", new RestartCommand());
 
         final MusicPlayerCommand musicPlayerCommand = new MusicPlayerCommand();
 
