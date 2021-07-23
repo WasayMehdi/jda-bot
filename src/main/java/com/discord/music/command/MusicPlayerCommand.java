@@ -1,6 +1,7 @@
 package com.discord.music.command;
 
 import com.discord.AudioCommand;
+import com.discord.BotAudioPlayer;
 import com.discord.music.MusicPlayer;
 import com.discord.music.Playlist;
 import com.discord.music.PlaylistManager;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MusicPlayerCommand extends AudioCommand {
@@ -129,6 +131,8 @@ public class MusicPlayerCommand extends AudioCommand {
             case "clear":
 
                 musicPlayer.getQueue().clear();
+                musicPlayer.next();
+                botAudioPlayer.stop();
 
                 textChannel.sendMessage("Cleared the song queue").queue();
 
@@ -157,17 +161,22 @@ public class MusicPlayerCommand extends AudioCommand {
     }
 
     private void playNextSong() {
+        AtomicBoolean loaded = new AtomicBoolean(true);
         musicPlayer.next().ifPresent(song -> {
             System.out.println("Loading: " + song + " with link: " + song.getLink());
             if(!nextPlayingMessages.empty()) {
                 nextPlayingMessages.pop().thenApply(message -> message.delete().submit());
             }
-            botAudioPlayer.play(voiceChannel, audioManager, (a, b, endReason) -> {
-                playNextSong();
-            });
-            botAudioPlayer.load(song.getLink(), 0);
             nextPlayingMessages.push(
                     textChannel.sendMessage("Now playing: " + song.getName()).submit());
+            botAudioPlayer.play(voiceChannel, audioManager, (a, b, endReason) -> {
+                if(loaded.get())
+                    playNextSong();
+            });
+            if(!botAudioPlayer.load(song.getLink(), 0)) {
+                loaded.set(false);
+                this.playNextSong();
+            }
         });
 
     }

@@ -21,11 +21,12 @@ import net.dv8tion.jda.api.managers.AudioManager;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 public class BotAudioPlayer {
-
-    boolean listening = false;
 
     private static final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
 
@@ -42,11 +43,11 @@ public class BotAudioPlayer {
     }
 
     public boolean load(final String identifier, final long position) {
+        final AudioTrack[] tracks = {null};
         final Future<?> loaded = playerManager.loadItem(identifier, new AudioLoadResultHandler() {
                     @Override
                     public void trackLoaded(AudioTrack track) {
-                        audioPlayer.playTrack(track);
-                        track.setPosition(position);
+                        tracks[0] = track;
                     }
 
                     @Override
@@ -66,16 +67,25 @@ public class BotAudioPlayer {
                 }
         );
 
-        return false;
+        try {
+            loaded.get(10_000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            // ignore
+        }
+
+        AudioTrack track = tracks[0];
+        if(track == null)
+            return false;
+
+        audioPlayer.playTrack(track);
+        track.setPosition(position);
+
+        return true;
     }
 
     public boolean play(final VoiceChannel channel, final AudioManager manager, final OnTrackEnd callback) {
-
-        if(!channel.equals(manager.getConnectedChannel())) {
-
-            manager.openAudioConnection(channel);
-
-        }
 
         audioPlayer.addListener(new AudioEventAdapter() {
             @Override
@@ -89,7 +99,7 @@ public class BotAudioPlayer {
 
                     @Override
                     public boolean canProvide() {
-                        lastFrame = audioPlayer.provide();
+                        lastFrame = player.provide();
                         //System.out.println(lastFrame);
                         return lastFrame != null;
                     }
@@ -106,7 +116,10 @@ public class BotAudioPlayer {
                 });
                 // Here we finally connect to the target voice channel
                 // and it will automatically start pulling the audio from the MySendHandler instance
+                if(!channel.equals(manager.getConnectedChannel())) {
+                    manager.openAudioConnection(channel);
 
+                }
             }
 
             @Override
@@ -117,6 +130,16 @@ public class BotAudioPlayer {
 
                 callback.execute(player, track, endReason);
 
+            }
+
+            @Override
+            public void onTrackException(AudioPlayer player, AudioTrack track, FriendlyException exception) {
+                // An already playing track threw an exception (track end event will still be received separately)
+            }
+
+            @Override
+            public void onTrackStuck(AudioPlayer player, AudioTrack track, long thresholdMs) {
+                System.out.println("STUCK STUCK STUCK");
             }
         });
 
