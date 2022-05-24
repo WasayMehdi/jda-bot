@@ -33,12 +33,12 @@ public class RiftCommand  extends BaseCommand {
                     @Nonnull
                     @Override
                     public String getAsMention() {
-                        return "<@&434418801031905295>";
+                        return "<@&539136441347735563>";
                     }
 
                     @Override
                     public long getIdLong() {
-                        return 434418801031905295L;
+                        return 539136441347735563L;
                     }
                 })
                 .build();

@@ -28,6 +28,19 @@ public class PlaylistManager {
         return true;
     }
 
+    public boolean delete(final String name, final String ownerId) {
+        if(!playlists.containsKey(name)) {
+            return false;
+        }
+
+        final Playlist playlist = playlists.get(name);
+        if(!ownerId.equals(playlist.ownerId)) {
+            return false;
+        }
+        playlists.remove(name);
+        return true;
+    }
+
     public Song remove(final String playlistName, final int index) {
 
         return forName(playlistName)

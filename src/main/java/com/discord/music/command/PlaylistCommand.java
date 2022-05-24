@@ -9,15 +9,17 @@ import com.discord.music.PlaylistManager;
 import com.discord.music.Song;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 import javax.xml.ws.handler.soap.SOAPMessageContext;
-import java.io.FileOutputStream;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -47,6 +49,70 @@ public class PlaylistCommand extends BaseCommand {
 
                 break;
 
+            case "import":
+                if(playlistName == null) {
+                    textChannel.sendMessage("Use this command as [~playlist import playlist_name]").queue();
+                    return false;
+                }
+                final List<Message.Attachment> attachments = event.getMessage().getAttachments();
+                System.out.println("ATTACHMENTS: " + attachments);
+                if(attachments.size() != 1) {
+                    textChannel.sendMessage("Please only attach one file to this command").queue();
+                    return false;
+                }
+                final Message.Attachment attachment = attachments.get(0);
+                if(!"csv".equals(attachment.getFileExtension())) {
+                    textChannel.sendMessage("Please get a csv file from https://exportify.net/").queue();
+                    return false;
+                }
+
+                textChannel.sendMessage("Loading playlist: " + attachment.getFileName()).submit();
+
+                final ExecutorService executorService = Executors.newFixedThreadPool(10);
+                final List<Song> songs = Collections.synchronizedList(new ArrayList<>());
+
+                try(final BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(attachment.retrieveInputStream().join(), StandardCharsets.UTF_8))) {
+                    reader.readLine(); // remove headers
+
+                    for (String line; (line = reader.readLine()) != null;) {
+                        final String[] parts = line.split(",");
+                        final String title = parts[1];
+                        final String author = parts[3];
+
+                        final String[] searchTerm = (title + " - " + author).split(" ");
+
+                        executorService.submit(() -> {
+                            final Song song = MusicPlayerCommand.forArgs(searchTerm, 0);
+
+                            if (song == null) {
+                                textChannel.sendMessage("Could not find: " + title).queue();
+                            } else {
+                                songs.add(song);
+                                textChannel.sendMessage("Added: " + song.getName()).queue();
+                            }
+                        });
+
+                    }
+                } catch (IOException e) {
+                    textChannel.sendMessage("Failed to grab playlist: " + e.getMessage()).submit();
+                }
+
+                try {
+                    executorService.awaitTermination(10, TimeUnit.MINUTES);
+                    if(ctx.getPlaylistManager().create(playlistName, member.getId())) {
+                        textChannel.sendMessage("Created playlist " + playlistName).queue();
+                    }
+                    for (Song s : songs) {
+                        ctx.getPlaylistManager().add(playlistName, s);
+                    }
+                    textChannel.sendMessage("Loaded " + songs.size() + " songs into " + playlistName).queue();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return false;
+                }
+
+                break;
             case "add":
 
                 final Song song = MusicPlayerCommand.forArgs(args, 3);
@@ -108,6 +174,14 @@ public class PlaylistCommand extends BaseCommand {
                 });
 
                 break;
+
+            case "delete":
+                if(!ctx.getPlaylistManager().delete(playlistName, member.getId())) {
+                    textChannel.sendMessage("Cannot delete playlist " + playlistName).submit();
+                } else {
+                    textChannel.sendMessage("Deleted playlist: " + playlistName).submit();
+                }
+                break;
         }
 
         ctx.getPlaylistManager().save();
@@ -145,6 +219,8 @@ public class PlaylistCommand extends BaseCommand {
                 "- shuffle [playlist name]\n" +
                 "- list [optional: playlist name]\n" +
                 "- clear [playlist name]\n" +
+                "- import [playlist name] (attach csv from https://exportify.net/)\n" +
+                "- delete [playlist name]\n" +
                 "*To queue up a playlist do ~addlist [playlist name]*";
     }
 }
