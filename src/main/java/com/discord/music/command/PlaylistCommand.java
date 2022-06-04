@@ -99,6 +99,7 @@ public class PlaylistCommand extends BaseCommand {
                 }
 
                 try {
+                    executorService.shutdown();
                     executorService.awaitTermination(10, TimeUnit.MINUTES);
                     if(ctx.getPlaylistManager().create(playlistName, member.getId())) {
                         textChannel.sendMessage("Created playlist " + playlistName).queue();
