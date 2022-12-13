@@ -47,6 +47,7 @@ public class BotAudioPlayer {
         final Future<?> loaded = playerManager.loadItem(identifier, new AudioLoadResultHandler() {
                     @Override
                     public void trackLoaded(AudioTrack track) {
+                        System.out.println("Track loaded!");
                         tracks[0] = track;
                     }
 

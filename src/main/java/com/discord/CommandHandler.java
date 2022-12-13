@@ -4,6 +4,7 @@ import com.discord.fun.*;
 import com.discord.meme.MemeCommand;
 import com.discord.music.command.MusicPlayerCommand;
 import com.discord.music.command.PlaylistCommand;
+import com.discord.texttospeech.SpeakCommand;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -36,6 +37,7 @@ class CommandHandler extends ListenerAdapter {
         COMMAND_MAP.put("dogify", new Dogify());
         COMMAND_MAP.put("archive", new ArchiveCommand());
         COMMAND_MAP.put("restart", new RestartCommand());
+        COMMAND_MAP.put("speak", new SpeakCommand());
 
         final MusicPlayerCommand musicPlayerCommand = new MusicPlayerCommand();
 
