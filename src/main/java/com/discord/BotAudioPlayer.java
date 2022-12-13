@@ -28,11 +28,11 @@ import java.util.function.Function;
 
 public class BotAudioPlayer {
 
-    private static final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
+    private final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
 
-    private static final AudioPlayer audioPlayer = playerManager.createPlayer();
+    private final AudioPlayer audioPlayer = playerManager.createPlayer();
 
-    static {
+    {
         playerManager.registerSourceManager(new YoutubeAudioSourceManager());
         playerManager.registerSourceManager(new LocalAudioSourceManager());
     }
@@ -93,6 +93,7 @@ public class BotAudioPlayer {
             public void onTrackStart(AudioPlayer player, AudioTrack track) {
                 super.onTrackStart(player, track);
 
+                System.out.println("Track starting");
                 // MySendHandler should be your AudioSendHandler implementation
                 manager.setSendingHandler(new AudioSendHandler() {
 
@@ -126,11 +127,10 @@ public class BotAudioPlayer {
             @Override
             public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
                 super.onTrackEnd(player, track, endReason);
+                System.out.println("Track ended for reason: " + endReason);
 
                 audioPlayer.removeListener(this);
-
                 callback.execute(player, track, endReason);
-
             }
 
             @Override
@@ -154,8 +154,6 @@ public class BotAudioPlayer {
 
     public boolean play(final GuildMessageReceivedEvent event, final OnTrackEnd callback) {
         Guild guild = event.getGuild();
-        // This will get the first voice channel with the name "music"
-        // matching by voiceChannel.getName().equalsIgnoreCase("music")
 
         if(event.getMember() == null || event.getMember().getVoiceState() == null) {
             return false;

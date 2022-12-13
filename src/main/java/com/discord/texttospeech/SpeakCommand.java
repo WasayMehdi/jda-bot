@@ -20,15 +20,30 @@ public class SpeakCommand extends AudioCommand {
         message.delete().submit();
 
         try {
-            TextToSpeechMp3 mp3 = new TextToSpeechMp3(String.join(" ", args).substring(6));
-            botAudioPlayer.load(mp3.getAudioFile().getAbsolutePath(), 0);
+            String text = String.join(" ", args).substring(6);
+            if (text.contains(";")) {
+                text = text.substring(0, text.indexOf(";"));
+            }
+            TextToSpeechMp3 mp3 = new TextToSpeechMp3(text);
 
             final BotAudioPlayer.OnTrackEnd onTrackEnd = (a, b, c) -> mp3.destroy();
 
-            botAudioPlayer.play(event, onTrackEnd);
+            final Optional<Member> mentioned = event.getMessage().getMentionedMembers().stream()
+                    .findFirst();
+
+            if(mentioned.isPresent()) {
+                botAudioPlayer.play(mentioned.get().getVoiceState().getChannel(),
+                        mentioned.get().getGuild().getAudioManager(),
+                        onTrackEnd);
+            } else {
+                botAudioPlayer.play(voiceChannel, audioManager, onTrackEnd);
+            }
+
+            botAudioPlayer.load(mp3.getAudioFile().getAbsolutePath(), 0);
 
         } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
 
         return true;

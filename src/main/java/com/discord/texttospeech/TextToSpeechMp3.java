@@ -8,6 +8,8 @@ import java.io.*;
 
 class TextToSpeechMp3 {
 
+    private static final double SPEAKING_RATE = 0.7;
+
     @Getter
     private final File audioFile;
 
@@ -24,15 +26,15 @@ class TextToSpeechMp3 {
 
             // Build the voice request, select the language code ("en-US") and the ssml voice gender
             // ("neutral")
-            VoiceSelectionParams voice =
-                    VoiceSelectionParams.newBuilder()
-                            .setLanguageCode("en-US")
-                            .setSsmlGender(SsmlVoiceGender.NEUTRAL)
-                            .build();
+            VoiceSelectionParams voice = VoiceSelectionParams.newBuilder()
+                    .setLanguageCode("en-US")
+                    .setSsmlGender(SsmlVoiceGender.MALE)
+                    .build();
 
             // Select the type of audio file you want returned
-            AudioConfig audioConfig =
-                    AudioConfig.newBuilder().setAudioEncoding(AudioEncoding.MP3).build();
+            AudioConfig audioConfig = AudioConfig.newBuilder()
+                    .setAudioEncoding(AudioEncoding.OGG_OPUS)
+                    .setSpeakingRate(SPEAKING_RATE).build();
 
             // Perform the text-to-speech request on the text input with the selected voice parameters and
             // audio file type
@@ -42,7 +44,7 @@ class TextToSpeechMp3 {
             // Get the audio contents from the response
             ByteString audioContents = response.getAudioContent();
 
-            final File temp = File.createTempFile("audio_tmp", ".mp3");
+            final File temp = File.createTempFile("audio_tmp", "");
             // Write the response to the output file.
             try (OutputStream out = new FileOutputStream(temp)) {
                 out.write(audioContents.toByteArray());
@@ -53,7 +55,6 @@ class TextToSpeechMp3 {
     }
 
     public void destroy() {
-        System.out.println("Destroying file... " + audioFile.getName());
         if (audioFile.exists()) {
             if (audioFile.delete()) {
                 System.out.println("Successfully deleted file: " + audioFile.getName());

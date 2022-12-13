@@ -35,22 +35,19 @@ public class LataCommand extends AudioCommand {
 
         message.delete().submit();
 
-        botAudioPlayer.load("LATASHORT.mp3", 0);
-
         final Optional<Member> mentioned = event.getMessage().getMentionedMembers().stream()
                 .findFirst();
         final BotAudioPlayer.OnTrackEnd onTrackEnd = (a, b, c) -> audioManager.closeAudioConnection();
 
         if(mentioned.isPresent()) {
-            System.out.println("Mentioned: " + mentioned);
             botAudioPlayer.play(mentioned.get().getVoiceState().getChannel(),
                     mentioned.get().getGuild().getAudioManager(),
                     onTrackEnd);
         } else {
-            botAudioPlayer.play(event, onTrackEnd);
+            botAudioPlayer.play(voiceChannel, audioManager, onTrackEnd);
         }
 
-
+        botAudioPlayer.load("LATASHORT.mp3", 0);
 
         return true;
 
